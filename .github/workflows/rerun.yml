@@ -1,0 +1,34 @@
+name: Rerun notebook
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [Bhuvann13]
+    paths:
+      - tools/rerun.py
+      - .github/workflows/rerun.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rerun:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install "tensorflow-cpu==2.15.*" "numpy<2" pandas scikit-learn matplotlib seaborn kagglehub nbformat nbclient ipykernel
+      - run: python tools/rerun.py
+      - name: Show errors
+        run: cat run_errors.txt || true
+      - name: Commit results
+        run: |
+          rm -f run_errors.txt best_model.h5
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add MED_ECG_Classification_with_cnn.ipynb RESULTS.md
+          git commit -m "Rerun notebook with a separate validation split" || echo "nothing to commit"
+          git push
