@@ -38,7 +38,7 @@ def apply_edits(nb):
         if cell.cell_type != "code":
             continue
         src = cell.source
-        if "drive.mount(" in src:
+        if "drive.mount(" in src or src.startswith("# Data: ECG Heartbeat Categorization Dataset"):
             src = DOWNLOAD_CELL
             log.append("replaced Google Drive mount with dataset download")
         for old, new in REPLACEMENTS:
@@ -77,16 +77,13 @@ def main():
     NotebookClient(nb, timeout=None, kernel_name="python3", allow_errors=True).execute()
     lines, errors = summarise(nb)
     print("\n".join(lines))
+    if errors:
+        # Do not save a notebook whose cells failed; fail the run so nothing is committed.
+        print("ERRORS:\n" + "\n".join(errors))
+        sys.exit(1)
     with open("RESULTS.md", "w") as fh:
         fh.write("# Results from the latest notebook run\n\n```\n" + "\n".join(lines) + "\n```\n")
-        if errors:
-            fh.write("\n## Cells that raised errors\n\n```\n" + "\n".join(errors) + "\n```\n")
-    if errors:
-        print("ERRORS:\n" + "\n".join(errors))
     nbformat.write(nb, NOTEBOOK)
-    with open("run_errors.txt", "w") as fh:
-        fh.write("\n".join(errors))
-
 
 if __name__ == "__main__":
     main()
