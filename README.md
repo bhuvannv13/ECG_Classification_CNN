@@ -40,7 +40,7 @@ One caveat: the upsampling happens before the validation split, so validation ac
 ## Running it
 
 ```bash
-pip install "tensorflow-cpu==2.15.*" "numpy<2" pandas scikit-learn matplotlib seaborn kagglehub notebook
+pip install -r requirements.txt
 jupyter notebook MED_ECG_Classification_with_cnn.ipynb
 ```
 
